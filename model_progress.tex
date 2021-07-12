@@ -1,0 +1,41 @@
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+
+% Document
+\begin{document}
+
+    Question 1: What are the inputs and outputs for a forecast?
+    Answer: My inputs are earlier horse racing bet pool states, and the outputs are  the next 3 bet pool states.
+
+    Question 2: What are the endogenous and exogenous variables?
+    Answer: There are mostly endogenous variables as each bet pool state depends on previous bet pool states (they are cumulative).
+    One exogenous example may be the race date.
+
+    Question 3: Are you working on a regression or classification predictive modeling problem?
+    Answer: Regression
+
+    Question 4: What are some alternate ways to frame your time series forecasting problem?
+    Answer: I could turn this into a classification model by predicting which bet pool will be over-valued vs. under-valued,
+    although more features would be necessary for this.
+
+    Question 5: Are the time series variables unstructured or structured?
+    Answer: A bit of both. In many cases they follow a structure of increasing over time.
+
+    Question 6: Are you working on a univariate or multivariate time series problem?
+    Answer: Multivariate, where I expect the output to have the same shape as one of the inputs.
+
+    Question 7: Do you require a single-step or a multi-step forecast?
+    Answer: Multi-step, roughly 3-4 steps into the future.
+
+    Question 8: Do you require a static or a dynamically updated model?
+    Answer: Likely dynamic, as the behaviour is dependent on humans and algorithms, whose behavioural patterns can change over time.
+
+    % TODO update once I know more
+    Question 9:Are your observations contiguous or discontiguous?
+    Answer: Not sure. I will need to investigate this.
+
+
+\end{document}

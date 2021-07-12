@@ -1,0 +1,25 @@
+\section{Model Ideas}
+
+\subsection{Multiple Regression}
+A dumb multiple regression where we consider the next value $y_t$ to be the dependent on all previous values from other
+sequences $x_t$.
+
+\subsection{Vector Autoregression}
+What even is this exactly?
+
+\subsection{Conventional Feed-forward with window of data}
+Most of the relevant betting decisions come towards the end of the sequence, so it may be easier to model it with a
+smaller and simpler window of say 50 cycles before closing.
+
+\subsection{LSTM}
+An LSTM can process the horse betting pools as an h-dimensional vector in each sequence element.
+The problem here is that the horse ordering is still a factor in the model.
+
+\section{Data Observations}
+While the assumption was that betpools always increase in size during the betting period, this is not the case. Roughly
+2\% of the time, a bet pool can experience a reduction ranging from a \$1 to much larger amounts like \$10,000,000
+
+The data is not very contiguous. Limiting the timestamp differences to 60 seconds already cuts the data down to 60\%.
+
+\section{Data Improvements}
+When analysing races, document from which years they are kept.
