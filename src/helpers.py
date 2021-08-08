@@ -1,5 +1,7 @@
-import pandas
+import math
 
+import pandas
+import random
 from src.logger import log
 
 
@@ -39,3 +41,29 @@ def get_processed_file(file_path):
                                            })
     log(f'Read in file of {len(df.index)} rows')
     return df
+
+
+def generate_new_combination_indices(seed: str, length: int, combination_count: int) -> [[int]]:
+
+    if math.factorial(length) < combination_count:
+        raise Exception(f'Cannot generate more than {length}! = {math.factorial(length)} combinations.')
+
+    existing = set()
+    random.seed(seed)
+    indices = range(0, length)
+    combinations = []
+    iterations = 0
+    while len(combinations) < combination_count:
+        combination = random.sample(indices, k=len(indices))
+        key = ','.join(str(x) for x in combination)
+        if key not in existing:
+            existing.add(key)
+            combinations.append(combination)
+        iterations += 1
+
+    log(f'Generated {len(combinations)} position combinations for {length} elements in {iterations} iterations')
+    return combinations
+
+
+if __name__ == '__main__':
+    print(generate_new_combination_indices('bananas', 14, 1000))

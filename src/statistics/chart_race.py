@@ -40,8 +40,8 @@ def chart_race(file_path: str, specific_refid: str = None):
 if __name__ == '__main__':
     # chart_race('../../data/win_only_data-2021-07-05T21-59-44.csv', '2018-01-21-2625211')
     # Synthetic
-    chart_race('../../data/win_only_data-2021-07-06T21-57-03.csv', '2017-09-03-2622462')
+    chart_race('../../data/1_cleaned/win_only_data-2021-07-06T21-57-03.csv', '2017-09-03-2622462')
     # Original
-    chart_race('../../data/win_only_data-2021-06-22T20-58-40.csv', '2017-09-03-2622462')
+    chart_race('../../data/1_cleaned/win_only_data-2021-06-22T20-58-40.csv', '2017-09-03-2622462')
 
     # chart_race('../../data/win_only_data-2021-07-06T21-57-03.csv')

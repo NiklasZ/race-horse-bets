@@ -13,7 +13,7 @@ def get_statistics(file_path):
           f"\n  - min: {race_cycles['counts'].min()}"
           f"\n  - max: {race_cycles['counts'].max()}"
           f"\n  - median: {race_cycles['counts'].median()}")
-    race_cycles.hist(column='counts', bins=60)
+    race_cycles.hist(column='counts', bins=500)
     plt.ylabel('# of races')
     plt.xlabel('# of cycles per race')
     plt.title('Number of bet cycles in the races')
@@ -22,4 +22,4 @@ def get_statistics(file_path):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    get_statistics('../../data/win_only_data.csv')
+    get_statistics('../../data/1_cleaned/win_only_data-2021-07-06T21-57-03.csv')
