@@ -14,10 +14,10 @@ class UnivariateLinear(tf.keras.Model):
         :return: [bet_amount]
         """
 
-        previous_states = inputs[-1:, :]
-        result = []
-        for p in tf.unstack(tf.squeeze(previous_states)):
-            prediction = tf.squeeze(self.dense1(tf.expand_dims(tf.expand_dims(p, axis=0), axis=0)))
-            result.append(prediction)
+        def operation(p):
+            return tf.squeeze(self.dense1(tf.expand_dims(tf.expand_dims(p, axis=0), axis=0)))
 
-        return tf.expand_dims(tf.convert_to_tensor(result), axis=0)
+        result = tf.map_fn(operation, tf.transpose(inputs[-1:, :]))
+        output = tf.expand_dims(tf.convert_to_tensor(result), axis=0)
+
+        return output

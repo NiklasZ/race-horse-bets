@@ -1,7 +1,7 @@
 import math
-
 import pandas
 import random
+import os
 from src.logger import log
 
 
@@ -63,6 +63,15 @@ def generate_new_combination_indices(seed: str, length: int, combination_count: 
 
     log(f'Generated {len(combinations)} position combinations for {length} elements in {iterations} iterations')
     return combinations
+
+# TODO finish
+def remove_empty_directories(path:str):
+    to_remove = []
+    for entry in os.scandir(path):
+        if not entry.is_file() and len(os.scandir(entry)):
+            pass
+            
+        
 
 
 if __name__ == '__main__':
