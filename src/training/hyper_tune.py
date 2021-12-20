@@ -1,4 +1,4 @@
-import json
+import math
 import os
 from datetime import datetime
 
@@ -7,21 +7,24 @@ import tensorflow as tf
 
 from src.logger import log
 from src.models.univariate_double_mlp import UnivariateDoubleMLP, compile_model as double_mlp_compile
+from src.models.univariate_quintuple_mlp_delta import UnivariateQuintupleMLPDelta, \
+    compile_model as quintuple_mlp_delta_compile
+from src.models.univariate_single_mlp_delta import UnivariateSingleMLPDelta, compile_model as single_mlp_delta_compile
 from src.models.univariate_triple_mlp import UnivariateTripleMLP, compile_model as triple_mlp_compile
-from src.training.prepare_data import get_training_data
+from src.models.univariate_triple_mlp_delta import UnivariateTripleMLPDelta, compile_model as triple_mlp_delta_compile
+from src.training.helpers import get_training_config
+from src.training.prepare_data import get_training_data, get_normalised_data
 
 if len(tf.config.list_physical_devices('GPU')) == 0:
     raise Exception('No GPU found')
 
 hyperparameter_compilers = {
     UnivariateDoubleMLP().__class__.__name__: double_mlp_compile,
-    UnivariateTripleMLP().__class__.__name__: triple_mlp_compile
+    UnivariateTripleMLP().__class__.__name__: triple_mlp_compile,
+    UnivariateSingleMLPDelta().__class__.__name__: single_mlp_delta_compile,
+    UnivariateTripleMLPDelta().__class__.__name__: triple_mlp_delta_compile,
+    UnivariateQuintupleMLPDelta().__class__.__name__: quintuple_mlp_delta_compile,
 }
-
-
-def get_training_config(file_path: str) -> dict:
-    with open(file_path) as f:
-        return json.load(f)
 
 
 def compile_and_hypertune(model_builder, model_name: str, training_data, output_folder: str, patience=5, max_epochs=20):
@@ -30,11 +33,13 @@ def compile_and_hypertune(model_builder, model_name: str, training_data, output_
     training_dataset = tf.data.Dataset.from_tensor_slices((train_inputs, train_labels))
     validation_dataset = tf.data.Dataset.from_tensor_slices((validation_inputs, validation_labels))
 
+    factor = 3
+    hyperband_iterations = 3
     tuner = kt.Hyperband(model_builder,
                          objective='val_loss',
                          max_epochs=max_epochs,
-                         factor=3,
-                         hyperband_iterations=3,
+                         factor=factor,
+                         hyperband_iterations=hyperband_iterations,
                          directory=output_folder,
                          project_name=model_name)
 
@@ -49,7 +54,7 @@ def compile_and_hypertune(model_builder, model_name: str, training_data, output_
 
 
 def main(existing_tuning_folder=None):
-    current_model = UnivariateDoubleMLP()
+    current_model = UnivariateQuintupleMLPDelta()
     name = current_model.__class__.__name__
 
     log(f'Tuning Model {name}')
@@ -59,7 +64,8 @@ def main(existing_tuning_folder=None):
     # path = '../../data/2_prepared/2021-08-13T16-54-57'
 
     config = get_training_config(f'{path}/config.json')
-    training_data = get_training_data(path, config)
+    normalised_data = get_normalised_data(path, '2020-08')
+    training_data = get_training_data(path, config, normalised_data)
 
     model_builder = hyperparameter_compilers.get(name)
 
@@ -73,7 +79,7 @@ def main(existing_tuning_folder=None):
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    compile_and_hypertune(model_builder, name, training_data, output_folder, patience=5, max_epochs=100)
+    compile_and_hypertune(model_builder, name, training_data, output_folder, patience=5, max_epochs=50)
 
 
 if __name__ == '__main__':

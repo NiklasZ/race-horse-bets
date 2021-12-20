@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 import pandas
@@ -31,21 +30,30 @@ def load_prepared_data(file_path: str) -> pandas.DataFrame:
     return df
 
 
-def trim_irrelevant_rows(df: pandas.DataFrame) -> [np.ndarray, List[str]]:
+def trim_irrelevant_rows(df: pandas.DataFrame, skip_rows_older_than=None) -> [np.ndarray, List[str]]:
     race_ids = df['refid'].unique()
+    chosen_race_ids = []
     races = []
+
+    if skip_rows_older_than:
+        log(f'Omitting races with refids older than {skip_rows_older_than}')
+
     for refid in tqdm(race_ids):
+        if skip_rows_older_than and refid < skip_rows_older_than:
+            continue
+
         race = df.loc[df['refid'] == refid]
         # This is slow, but picking or dropping are both slow.
         cleaned = race.drop(columns=['_id', 'refid'])
         races.append(cleaned.to_numpy())
+        chosen_race_ids.append(refid)
 
-    if len(race_ids) != len(races):
-        raise Exception('Race id count does not match the # of races')
+    # if len(race_ids) != len(races):
+    #     raise Exception('Race id count does not match the # of races')
 
     as_numpy = np.asarray(races)
     log(f"Converted data into numpy array of shape {as_numpy.shape}")
-    return [as_numpy, race_ids.tolist()]
+    return [as_numpy, chosen_race_ids]
 
 
 # Convert data into an input (x) and label (y) set for evaluation.
@@ -68,21 +76,32 @@ def inflate_data(to_inflate: np.ndarray, indices: np.ndarray) -> np.ndarray:
     return np.asarray(new_data)
 
 
-def get_training_data(folder_path: str, config: dict) -> [np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray,
-                                                          np.ndarray, List[str]]:
+def get_normalised_data(folder_path: str, skip_older_than=None) -> [np.ndarray, np.ndarray, np.ndarray, List[str]]:
     data = load_prepared_data(f'{folder_path}/data.csv')
-    [training_data, race_ids] = trim_irrelevant_rows(data)
+    [training_data, race_ids] = trim_irrelevant_rows(data, skip_older_than)
 
     # Split into training, validation and testing set
     n = len(training_data)
     training_set = training_data[0:int(n * 0.7)]
     validation_set = training_data[int(n * 0.7):int(n * 0.9)]
     test_set = training_data[int(n * 0.9):]
+
+    training_ids = race_ids[0:int(n * 0.7)]
+    validation_ids = race_ids[int(n * 0.7):int(n * 0.9)]
     test_ids = race_ids[int(n * 0.9):]
 
     norm_training = training_set / training_set.max()
     norm_validation = validation_set / training_set.max()
     norm_test = test_set / training_set.max()
+
+    return [norm_training, norm_validation, norm_test, training_ids, validation_ids, test_ids]
+
+
+def get_training_data(folder_path: str, config: dict, normalised_data=None) -> [np.ndarray, np.ndarray, np.ndarray,
+                                                                                np.ndarray, np.ndarray,
+                                                                                np.ndarray]:
+    normalised_data = normalised_data if normalised_data is not None else get_normalised_data(folder_path, config)
+    norm_training, norm_validation, norm_test, *_ = normalised_data
 
     if 'data_inflation_factor' not in config:
         config['data_inflation_factor'] = 1
@@ -90,8 +109,11 @@ def get_training_data(folder_path: str, config: dict) -> [np.ndarray, np.ndarray
     if 'cycles_into_the_future' not in config:
         config['cycles_into_the_future'] = 2
 
-    combination_indices = np.asarray(
-        generate_new_combination_indices(config['random_seed'], 14, config['data_inflation_factor']))
+    if config['data_inflation_factor'] == 1:
+        combination_indices = np.asarray([range(14)])
+    else:
+        combination_indices = np.asarray(
+            generate_new_combination_indices(config['random_seed'], 14, config['data_inflation_factor']))
 
     train_inputs, train_labels = split_into_inputs_and_labels(inflate_data(norm_training, combination_indices),
                                                               config['cycles_into_the_future'])
@@ -100,5 +122,4 @@ def get_training_data(folder_path: str, config: dict) -> [np.ndarray, np.ndarray
         config['cycles_into_the_future'])
     test_inputs, test_labels = split_into_inputs_and_labels(norm_test, config['cycles_into_the_future'])
 
-    return [train_inputs, train_labels, validation_inputs, validation_labels, test_inputs, test_labels,
-            test_ids]
+    return [train_inputs, train_labels, validation_inputs, validation_labels, test_inputs, test_labels]

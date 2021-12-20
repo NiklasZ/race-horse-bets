@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 
-# TODO try optimising hyper-parameters via HP.
 class MultistepDense(tf.keras.Model):
     def __init__(self):
         super().__init__()

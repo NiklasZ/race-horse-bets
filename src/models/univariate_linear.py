@@ -5,6 +5,7 @@ class UnivariateLinear(tf.keras.Model):
     def __init__(self):
         super().__init__()
         self.dense1 = tf.keras.layers.Dense(units=1, activation='linear')
+        self.tuned_patience = 5
 
     def call(self, inputs):
         """
