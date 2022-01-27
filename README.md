@@ -12,7 +12,7 @@ Return_A = 0.8 * 100 * 0.1 = $8
 
 Return_B = 0.2 * 100 * 10 = $200
 
-Which makes it clear which bet on average, yields a better return. Of course, in reality most betting participants have some sense of which horses have winning potential and the odds correlated with he bet pools. However, this is not perfect and predicting the bet pools beforehand helps here.
+Which makes it clear which bet on average, yields a better return. Of course, in reality most betting participants have some sense of which horses have winning potential and the odds are correlated with the bet pools. However, this is not perfect and predicting the bet pools beforehand helps here.
 
 ## Data used
 
